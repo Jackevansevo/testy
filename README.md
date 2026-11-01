@@ -106,26 +106,7 @@ cd examples/testy && uv run testy
 cd examples/pytest && uv run pytest
 ```
 
-## Features compared with pytest
-
-| | testy | pytest |
-|---|---|---|
-| Finding tests | Parses files with `ast`, imports nothing up front | Imports every test module and runs plugin hooks |
-| Skipping unchanged tests | Built in, keyed on each file's imports | No (`--lf` reruns last failures only) |
-| Parallel runs | Default, threads in one process (free-threaded Python) | `pytest-xdist`, separate worker processes |
-| Unit of parallelism | File (tests within a file run in order) | Test (`--dist load`) or file (`--dist loadfile`) |
-| Fixtures | Plain imports and context managers | Injected by argument name, `conftest.py`, scopes |
-| Selecting tests | Paths, `file.py::test_name`, `-k` expressions | The same, plus markers (`-m`) |
-| Output | `go test` style: a line per file, `-q` dots, `-v` a line per test | Dots, `-v`, many plugins |
-| Failure details | Tracebacks rendered by rich | Assertion rewriting shows compared values |
-| Debugging | `--pdb`, and `breakpoint()` with `--pdb` | `--pdb`, `breakpoint()`, `-s` |
-| Rerun failures | `--lf` (only failed tests), `--ff` (failures first) | `--lf`, `--ff` |
-| Stop early | `-x` | `-x`, `--maxfail` |
-| Async tests | `async def` runs with `asyncio.run` | Needs a plugin such as `pytest-asyncio` |
-| Configuration | None | `pyproject.toml`, `pytest.ini`, `conftest.py` |
-| Plugins | None | Large ecosystem |
-
-### Intentionally not supported
+## Intentionally not supported
 
 These are left out on purpose, to keep testy small and its caching correct:
 
