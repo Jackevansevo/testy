@@ -6,4 +6,4 @@ asciinema rec --headless --window-size 90x32 --title "testy: skipping unchanged 
     --command "$here/demo.sh" --overwrite --return "$here/demo.cast"
 # Rendered at double size; the README shows it at half width, so it stays sharp on
 # high-DPI screens.
-agg --font-size 32 --idle-time-limit 2 --last-frame-duration 5 "$here/demo.cast" "$here/demo.gif"
+agg --theme solarized-light --font-size 32 --idle-time-limit 2 --last-frame-duration 5 "$here/demo.cast" "$here/demo.gif"
