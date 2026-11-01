@@ -108,22 +108,20 @@ cd examples/pytest && uv run pytest
 
 ## Intentionally not supported
 
-These are left out on purpose, to keep testy small and its caching correct:
-
-- **Fixture injection, `conftest.py` and fixture scopes.** Import what a test needs. Implicit fixtures are invisible to the import graph, so the cache couldn't track them.
-- **Plugins and hooks.** There is no extension API.
-- **`@pytest.mark.parametrize` and other markers** (`skip`, `xfail`, custom marks). Use a loop, separate functions, or `-k`.
-- **Test classes** (`class Test...`, `unittest.TestCase`). Only top-level functions are tests.
-- **Assertion rewriting.** Failures show a normal `AssertionError` and traceback. Add a message to the `assert` when you need the values.
-- **Showing test output.** `print` output is always discarded, with no `-s`. Output from parallel threads would only be noise.
-- **Test isolation.** Files share one process and its module state. Keeping tests independent is the developer's job.
-- **Running the tests within one file in parallel.** Split a slow file instead.
-- **Tracking data files, environment variables and dynamic imports** (`importlib`, entry points). Run with `--force` after changing them.
-- **Tracking code outside the project**, including editable path dependencies. Third-party packages are covered only through `uv.lock`.
-- **Configuration files.** All options are command-line flags.
-- **Built-in helper fixtures** (`tmp_path`, `monkeypatch`, `capsys`). Use `tempfile`, `unittest.mock` and the like directly.
-- **Doctests, coverage integration, reruns of flaky tests and JUnit XML reports.**
-- **Python before 3.14.**
+- Fixture injection, `conftest.py` and fixture scopes
+- Plugins and hooks
+- Parametrize and markers (`skip`, `xfail`)
+- Test classes and `unittest.TestCase`
+- Assertion rewriting
+- Showing test output (`-s`)
+- Test isolation
+- Parallelism within a file
+- Tracking data files, environment variables and dynamic imports
+- Tracking code outside the project
+- Configuration files
+- Built-in helpers (`tmp_path`, `monkeypatch`, `capsys`)
+- Doctests, coverage, flaky-test reruns and JUnit XML
+- Python before 3.14
 
 ## Benchmark
 
