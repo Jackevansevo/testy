@@ -28,31 +28,6 @@ pip install git+https://github.com/Jackevansevo/testy
 
 For parallel runs, use a free-threaded Python, for example by putting `3.14t` in the project's `.python-version` (`uv python install 3.14t`).
 
-## Usage
-
-```bash
-uv run testy                        # run what changed, one line per file
-uv run testy -q                     # a dot per test
-uv run testy -v                     # a line per test
-uv run testy tests/test_todos.py    # files or directories
-uv run testy tests/test_todos.py::test_complete
-uv run testy -k "todos and not catalog"
-uv run testy -x                     # stop after the first failure
-uv run testy --ff                   # run last run's failures first
-uv run testy --lf                   # run only the tests that failed last time
-uv run testy --force                # ignore the cache
-uv run testy -j 4                   # threads (default: number of CPUs)
-uv run testy --pdb                  # debug failures (one file at a time)
-```
-
-Output follows `go test`: no summary when everything passes, and a final `FAIL` line and exit code 1 otherwise.
-
-```
-ok    tests/test_arith.py      0.002s  ..
-ok    tests/test_stats.py    (cached)
-FAIL  tests/test_todos.py      0.206s  ..F..
-```
-
 ## Writing tests
 
 Tests are top-level functions named `test*` that use plain `assert`. `async def` tests are supported.
