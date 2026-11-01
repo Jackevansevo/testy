@@ -108,11 +108,7 @@ Results are stored in `.testy/cache.json`.
 
 ## Cache accuracy
 
-A test file is skipped when its cache key matches its last passing run. The key covers only:
-
-- the contents of the test file and of every project file it imports, directly or indirectly, as reported by `ruff analyze graph` (plus the `__init__.py` files that importing them runs);
-- `uv.lock`, if there is one;
-- the Python version and testy's version.
+A test file is skipped when nothing in its cache key has changed since it last passed. The key covers the file and everything it imports (per `ruff analyze graph`), `uv.lock`, and the Python and testy versions.
 
 Anything else that changes a test's outcome is invisible to the cache, and a stale pass will be reported as `(cached)`:
 
