@@ -167,15 +167,25 @@ On the fast suite, 2.20s of pytest's time is collection (`pytest --collect-only`
 
 ### Incremental runs: testy's cache
 
-testy only reruns test files whose imports changed. pytest has no equivalent, so there is nothing to compare against: every pytest run is a full run, as above.
+testy only reruns test files whose imports changed. pytest has no equivalent, so after any change it has to run the whole suite again. The pytest column is its fastest full run of each suite from the table above: plain `pytest` for the fast suite, `pytest -n auto` for the CPU-heavy one.
 
-| Scenario | Fast: time | Fast: tests run | CPU-heavy: time | CPU-heavy: tests run |
+**Fast suite:**
+
+| Scenario | Tests testy runs | testy | pytest | Difference |
 |---|---|---|---|---|
-| Nothing changed | 0.31s | 0 | 0.09s | 0 |
-| Edit a leaf module | 0.33s | 10 | 0.16s | 10 |
-| Edit the most-imported module | 0.89s | 20,000 | 2.85s | 1,000 |
+| Nothing changed | 0 | **0.31s** | 5.64s | **−95% (18× faster)** |
+| Edit a leaf module | 10 | **0.33s** | 5.64s | **−94% (17× faster)** |
+| Edit the most-imported module | 20,000 | **0.89s** | 5.64s | **−84% (6.3× faster)** |
 
-Editing the most-imported module reruns every test, so it costs about as much as a full run.
+**CPU-heavy suite:**
+
+| Scenario | Tests testy runs | testy | pytest | Difference |
+|---|---|---|---|---|
+| Nothing changed | 0 | **0.09s** | 3.00s | **−97% (33× faster)** |
+| Edit a leaf module | 10 | **0.16s** | 3.00s | **−95% (19× faster)** |
+| Edit the most-imported module | 1,000 | **2.85s** | 3.00s | **−5% (about the same)** |
+
+Editing the most-imported module reruns every test, so testy does a full run too, and the gap is just the full-run gap.
 
 ## Requirements
 
