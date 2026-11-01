@@ -102,7 +102,25 @@ Split fixtures into modules by topic (`tests/fixtures/numbers.py`, `tests/fixtur
 
 - **Isolation is your job.** Files run in parallel in one process and share module state, so tests must not modify shared objects or assume a shared database is empty.
 - **Test output is discarded.** `print` output never appears. `breakpoint()` and `input()` fail immediately instead of hanging, unless you pass `--pdb`.
-- **The cache only sees Python imports within the project.** Use `--force` after changing data files, environment variables or code outside the project.
+- **The cache only sees static imports.** See [Cache accuracy](#cache-accuracy).
+
+## Cache accuracy
+
+A test file is skipped when its cache key matches its last passing run. The key covers only:
+
+- the contents of the test file and of every project file it imports, directly or indirectly, as reported by `ruff analyze graph` (plus the `__init__.py` files that importing them runs);
+- `uv.lock`, if there is one;
+- the Python version and testy's version.
+
+Anything else that changes a test's outcome is invisible to the cache, and a stale pass will be reported as `(cached)`:
+
+- **Dynamic imports:** `importlib.import_module`, `__import__`, plugins loaded by entry point, and other imports ruff can't resolve statically.
+- **Files a test reads:** anything opened with `open()` or similar, such as JSON fixtures, templates, SQL files and `.env` files.
+- **The environment:** environment variables, the clock, randomness, the network, and external services such as databases.
+- **Code outside the project:** other repositories, path or editable dependencies, and installed packages when there's no `uv.lock`.
+- **Other tests:** state that one test leaves behind for another in the same process.
+
+Run with `--force` after changing any of these, and use `--force` in CI so every test runs there.
 
 ## Examples
 
