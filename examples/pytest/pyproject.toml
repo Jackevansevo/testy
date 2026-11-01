@@ -1,0 +1,12 @@
+[project]
+name = "calc-pytest"
+version = "0.1.0"
+description = "The example app's tests, written the usual pytest way, for comparison with testy"
+requires-python = ">=3.14"
+dependencies = ["calc", "pytest", "pytest-xdist"]
+
+[tool.uv.sources]
+calc = { path = "../testy", editable = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
