@@ -20,8 +20,10 @@ from gen import generate
 
 TESTY = [sys.executable, "-m", "testy"]
 PYTEST = [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"]
-# Ignore the caller's PYTEST_ADDOPTS (e.g. `-p no:xdist`) so runs are comparable.
-ENV = {k: v for k, v in os.environ.items() if k != "PYTEST_ADDOPTS"}
+# Ignore caller settings that skew the comparison: PYTEST_ADDOPTS (e.g. `-p no:xdist`),
+# and PYTHONDONTWRITEBYTECODE, which stops pytest caching its rewritten test modules.
+IGNORED = {"PYTEST_ADDOPTS", "PYTHONDONTWRITEBYTECODE"}
+ENV = {k: v for k, v in os.environ.items() if k not in IGNORED}
 
 
 def run(cmd: list[str], cwd: Path) -> tuple[float, int]:

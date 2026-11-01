@@ -20,6 +20,22 @@ A small, fast Python test runner with a different set of tradeoffs from pytest:
 
 Results are stored in `.testy/cache.json`.
 
+## Installation
+
+testy isn't on PyPI. Install it from GitHub as a development dependency of the project you want to test, so it runs in that project's environment:
+
+```bash
+uv add --dev git+https://github.com/Jackevansevo/testy
+```
+
+Or with pip:
+
+```bash
+pip install git+https://github.com/Jackevansevo/testy
+```
+
+For parallel runs, use a free-threaded Python, for example by putting `3.14t` in the project's `.python-version` (`uv python install 3.14t`).
+
 ## Usage
 
 ```bash
@@ -131,7 +147,7 @@ cd examples/pytest && uv run pytest
 uv run bench/bench.py --modules 5000 --tests 2000
 ```
 
-Results on Apple silicon (2 performance and 4 efficiency cores), Python 3.14t, best of 2 runs. Each time includes starting Python. Two suites were used:
+Results on Apple silicon (2 performance and 4 efficiency cores), Python 3.14t, best of 3 runs, so Python's bytecode caches are warm. Each time includes starting Python. Two suites were used:
 
 - **Fast:** 5,000 modules, 2,000 test files, 20,000 quick tests.
 - **CPU-heavy:** 500 modules, 100 test files, 1,000 tests that each do pure-Python work (`--work 200000`).
@@ -142,12 +158,14 @@ A like-for-like comparison: each runner runs the whole suite, with testy's cache
 
 | Suite | Mode | pytest | testy | Difference |
 |---|---|---|---|---|
-| Fast | One at a time | 9.34s | **1.40s** | **−85% (6.7× faster)** |
-| Fast | Parallel | 22.94s | **0.96s** | **−96% (24× faster)** |
-| CPU-heavy | One at a time | 6.60s | **5.97s** | **−10% (1.1× faster)** |
-| CPU-heavy | Parallel | 3.60s | **3.04s** | **−16% (1.2× faster)** |
+| Fast | One at a time | 5.64s | **1.01s** | **−82% (5.6× faster)** |
+| Fast | Parallel | 9.42s | **0.90s** | **−90% (10× faster)** |
+| CPU-heavy | One at a time | 6.34s | **6.15s** | **−3% (about the same)** |
+| CPU-heavy | Parallel | 3.00s | **2.70s** | **−10% (1.1× faster)** |
 
-On the fast suite, 7.38s of pytest's time is collection alone (`pytest --collect-only`), and `pytest -n auto` is slower than plain pytest because each worker process collects the whole suite again. On the CPU-heavy suite the tests themselves dominate, so the runners are much closer.
+On the fast suite, 2.20s of pytest's time is collection (`pytest --collect-only`), and most of the rest is pytest's per-test overhead. `pytest -n auto` is slower than plain pytest there, because each worker process collects the whole suite again. On the CPU-heavy suite the tests themselves dominate, so the runners are close.
+
+These numbers are with Python's bytecode cache on. With `PYTHONDONTWRITEBYTECODE=1` set, pytest can't cache its rewritten test modules and rewrites every one on every run: collection alone took 7.4s on the fast suite. The benchmark ignores that variable.
 
 ### Incremental runs: testy's cache
 
@@ -155,9 +173,9 @@ testy only reruns test files whose imports changed. pytest has no equivalent, so
 
 | Scenario | Fast: time | Fast: tests run | CPU-heavy: time | CPU-heavy: tests run |
 |---|---|---|---|---|
-| Nothing changed | 0.30s | 0 | 0.09s | 0 |
+| Nothing changed | 0.31s | 0 | 0.09s | 0 |
 | Edit a leaf module | 0.33s | 10 | 0.16s | 10 |
-| Edit the most-imported module | 0.93s | 20,000 | 2.69s | 1,000 |
+| Edit the most-imported module | 0.89s | 20,000 | 2.85s | 1,000 |
 
 Editing the most-imported module reruns every test, so it costs about as much as a full run.
 
