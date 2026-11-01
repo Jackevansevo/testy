@@ -86,22 +86,9 @@ Split fixtures into modules by topic (`tests/fixtures/numbers.py`, `tests/fixtur
   <img alt="Fast suite, seconds. Full run one at a time: testy 1.01, pytest 5.64. Full run in parallel: testy 0.90, pytest -n auto 9.42. After editing one module: testy 0.33, pytest 5.64 (it reruns everything)." src="bench/chart-light.svg">
 </picture>
 
-The suite is synthetic: 20,000 tests in 2,000 files, importing 5,000 small modules. It ran on Apple silicon with Python 3.14t, taking the best of 3 runs.
+20,000 trivial tests in 2,000 files, on Apple silicon with Python 3.14t. Most of pytest's time here is its own overhead, not the tests: collection, plus per-test capture, reports and plugin hooks.
 
-Where pytest's time goes, from profiling a warm `pytest` run of this suite (5.6s):
-
-- **About 40% is collection** (2.2s on its own). pytest imports every test module, then builds an object for each test, with its markers and fixture information.
-- **About 60% is running the tests, but the test bodies themselves are about 2%.** pytest runs each test in three phases (setup, call and teardown). It wraps each phase in output, log and warnings capture, builds a report object for it, and passes every step through its plugin hooks: about 400,000 hook calls for 20,000 tests.
-
-testy skips almost all of that. It reads test names straight from the source, imports each test module only when it runs it, calls each test function directly, and discards output once for the whole run.
-
-How fair is it? It's close to a best case for testy and a worst case for pytest:
-
-- **The tests do almost nothing.** Each one checks a bit of arithmetic, so the runner's own per-test overhead dominates. Real tests do real work, and the gap shrinks. On 1,000 CPU-heavy tests, full runs were only 3–10% faster than pytest.
-- **The modules are tiny.** Real projects often import heavy libraries, and both runners pay that cost equally.
-- **No fixtures or plugins are used.** Real suites usually have both. Plugins slow pytest down further, while fixtures add setup work that testy would have to do too.
-- **`pytest -n auto` is at its weakest.** Every worker collects the whole suite again, which costs more than it saves when tests are fast.
-- **The edit comparison assumes pytest reruns everything.** In practice you might narrow it with `-k`, `--lf` or a plugin like `pytest-testmon`.
+That makes this close to a best case for testy. When tests do real work the gap shrinks: on CPU-heavy tests, full runs were only 3–10% faster.
 
 Reproduce it with `uv run bench/bench.py --modules 5000 --tests 2000`, and redraw the chart with `uv run --with matplotlib bench/chart.py`.
 
