@@ -86,7 +86,15 @@ Split fixtures into modules by topic (`tests/fixtures/numbers.py`, `tests/fixtur
   <img alt="Fast suite, seconds. Full run one at a time: testy 1.01, pytest 5.64. Full run in parallel: testy 0.90, pytest -n auto 9.42. After editing one module: testy 0.33, pytest 5.64 (it reruns everything)." src="bench/chart-light.svg">
 </picture>
 
-A synthetic suite of 20,000 fast tests in 2,000 files over 5,000 modules, on Apple silicon with Python 3.14t, best of 3 runs. On a suite of 1,000 CPU-heavy tests, where the tests themselves take most of the time, full runs are within 3–10% of pytest, but a run after editing one module takes 0.16s against pytest's 3.00s.
+The suite is synthetic: 20,000 tests in 2,000 files, importing 5,000 small modules. It ran on Apple silicon with Python 3.14t, taking the best of 3 runs.
+
+How fair is it? It's close to a best case for testy and a worst case for pytest:
+
+- **The tests do almost nothing.** Each one checks a bit of arithmetic, so the runner's own per-test overhead dominates. Real tests do real work, and the gap shrinks. On 1,000 CPU-heavy tests, full runs were only 3–10% faster than pytest.
+- **The modules are tiny.** Real projects often import heavy libraries, and both runners pay that cost equally.
+- **No fixtures or plugins are used.** Real suites usually have both. Plugins slow pytest down further, while fixtures add setup work that testy would have to do too.
+- **`pytest -n auto` is at its weakest.** Every worker collects the whole suite again, which costs more than it saves when tests are fast.
+- **The edit comparison assumes pytest reruns everything.** In practice you might narrow it with `-k`, `--lf` or a plugin like `pytest-testmon`.
 
 Reproduce it with `uv run bench/bench.py --modules 5000 --tests 2000`, and redraw the chart with `uv run --with matplotlib bench/chart.py`.
 
