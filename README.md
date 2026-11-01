@@ -108,12 +108,4 @@ Results are stored in `.testy/cache.json`.
 
 A test file is skipped when nothing in its cache key has changed since it last passed. The key covers the file and everything it imports (per `ruff analyze graph`), `uv.lock`, and the Python and testy versions.
 
-Anything else that changes a test's outcome is invisible to the cache, and a stale pass will be reported as `(cached)`:
-
-- **Dynamic imports:** `importlib.import_module`, `__import__`, plugins loaded by entry point, and other imports ruff can't resolve statically.
-- **Files a test reads:** anything opened with `open()` or similar, such as JSON fixtures, templates, SQL files and `.env` files.
-- **The environment:** environment variables, the clock, randomness, the network, and external services such as databases.
-- **Code outside the project:** other repositories, path or editable dependencies, and installed packages when there's no `uv.lock`.
-- **Other tests:** state that one test leaves behind for another in the same process.
-
-Run with `--force` after changing any of these, and use `--force` in CI so every test runs there.
+Anything else that changes a test's outcome is invisible to the cache, such as dynamic imports (`importlib`), files read with `open()`, environment variables, code outside the project, and state shared between tests. Run with `--force` after changing these, and in CI.
