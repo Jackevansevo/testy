@@ -31,6 +31,7 @@ uv run testy tests/test_todos.py::test_complete
 uv run testy -k "todos and not catalog"
 uv run testy -x                     # stop after the first failure
 uv run testy --ff                   # run last run's failures first
+uv run testy --lf                   # run only the tests that failed last time
 uv run testy --force                # ignore the cache
 uv run testy -j 4                   # threads (default: number of CPUs)
 uv run testy --pdb                  # debug failures (one file at a time)
@@ -118,7 +119,8 @@ cd examples/pytest && uv run pytest
 | Output | `go test` style: a line per file, `-q` dots, `-v` a line per test | Dots, `-v`, many plugins |
 | Failure details | Tracebacks rendered by rich | Assertion rewriting shows compared values |
 | Debugging | `--pdb`, and `breakpoint()` with `--pdb` | `--pdb`, `breakpoint()`, `-s` |
-| Stop early / reorder | `-x`, `--ff` | `-x`, `--ff`, `--lf`, and plugins |
+| Rerun failures | `--lf` (only failed tests), `--ff` (failures first) | `--lf`, `--ff` |
+| Stop early | `-x` | `-x`, `--maxfail` |
 | Async tests | `async def` runs with `asyncio.run` | Needs a plugin such as `pytest-asyncio` |
 | Configuration | None | `pyproject.toml`, `pytest.ini`, `conftest.py` |
 | Plugins | None | Large ecosystem |
@@ -154,27 +156,27 @@ Results on Apple silicon (2 performance and 4 efficiency cores), Python 3.14t, b
 
 **5,000 modules, 2,000 test files, 20,000 fast tests:**
 
-| Scenario | Runner | Time | Tests run |
-|---|---|---|---|
-| Run everything | pytest | 9.27s | 20,000 |
-| Run everything | pytest -n auto | 20.35s | 20,000 |
-| Run everything | testy `--force` | **1.01s** | 20,000 |
-| Collect only | pytest `--collect-only` | 7.77s | 0 |
-| Nothing changed | testy | **0.32s** | 0 |
-| Edit a leaf module | testy | **0.33s** | 10 |
-| Edit the most-imported module | testy | 0.97s | 20,000 |
+| Scenario | Runner | Time | vs pytest | Tests run |
+|---|---|---|---|---|
+| Run everything | pytest | 9.27s | baseline | 20,000 |
+| Run everything | pytest -n auto | 20.35s | +120% (2.2× slower) | 20,000 |
+| Run everything | testy `--force` | **1.01s** | **−89% (9.2× faster)** | 20,000 |
+| Collect only | pytest `--collect-only` | 7.77s | −16% | 0 |
+| Nothing changed | testy | **0.32s** | **−97% (29× faster)** | 0 |
+| Edit a leaf module | testy | **0.33s** | **−96% (28× faster)** | 10 |
+| Edit the most-imported module | testy | 0.97s | −90% (9.6× faster) | 20,000 |
 
 **100 test files, 1,000 CPU-heavy tests** (`--work 200000`):
 
-| Scenario | Runner | Time | Tests run |
-|---|---|---|---|
-| Run everything | pytest | 6.62s | 1,000 |
-| Run everything | pytest -n auto | 3.63s | 1,000 |
-| Run everything | testy `--force` | **3.15s** | 1,000 |
-| Nothing changed | testy | **0.08s** | 0 |
-| Edit a leaf module | testy | **0.16s** | 10 |
+| Scenario | Runner | Time | vs pytest | Tests run |
+|---|---|---|---|---|
+| Run everything | pytest | 6.62s | baseline | 1,000 |
+| Run everything | pytest -n auto | 3.63s | −45% (1.8× faster) | 1,000 |
+| Run everything | testy `--force` | **3.15s** | **−52% (2.1× faster)** | 1,000 |
+| Nothing changed | testy | **0.08s** | **−99% (83× faster)** | 0 |
+| Edit a leaf module | testy | **0.16s** | **−98% (41× faster)** | 10 |
 
-pytest has no equivalent of the cached scenarios: every pytest run collects and runs everything. With fast tests, `pytest -n auto` is slower than plain pytest, because each worker process collects the whole suite again.
+"vs pytest" compares each time with a plain `pytest` run of the whole suite. pytest has no equivalent of the cached scenarios: every pytest run collects and runs everything. With fast tests, `pytest -n auto` is slower than plain pytest, because each worker process collects the whole suite again.
 
 ## Requirements
 
