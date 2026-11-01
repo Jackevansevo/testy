@@ -3,12 +3,12 @@
 > [!WARNING]
 > testy is a purely experimental project, it is not production-ready
 
-A small, fast and simple Python test runner
+A small, fast and simple Python test runner:
 
-- **Fast.** Test files are found by parsing them, not importing them, so there is no slow collection step.
-- **Skips unchanged tests.** Like `go test`, results are cached and a test file only reruns when something it imports has changed.
-- **Simple.** No plugins, no `conftest.py`, no fixture injection. Tests are plain functions, and fixtures are plain Python you import.
-- **Parallel by default.** On free-threaded Python (3.14t), test files run on real parallel threads.
+- ⚡ **Fast.** Test files are found by parsing them, not importing them, so there is no slow collection step.
+- ♻️ **Skips unchanged tests.** Like `go test`, results are cached and a test file only reruns when something it imports has changed.
+- 🧩 **Simple.** No plugins, no `conftest.py`, no fixture injection. Tests are plain functions, and fixtures are plain Python you import.
+- 🧵 **Parallel by default.** On free-threaded Python (3.14t), test files run on real parallel threads.
 
 <a href="https://asciinema.org/a/YEIEfpFVOER3UqUd"><img src="demo/demo.gif" alt="testy demo" width="886"></a>
 
