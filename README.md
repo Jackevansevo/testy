@@ -10,16 +10,6 @@ A small, fast Python test runner with a different set of tradeoffs from pytest:
 - **Simple.** No plugins, no `conftest.py`, no fixture injection. Tests are plain functions, and fixtures are plain Python you import.
 - **Parallel by default.** On free-threaded Python (3.14t), test files run on real parallel threads.
 
-## How it works
-
-1. **Discover:** walk the given paths for `test_*.py` and read each file's top-level `test*` functions with `ast`, without importing anything.
-2. **Graph:** run `ruff analyze graph` to find which files each file imports, adding the parent `__init__.py` files that importing a module runs.
-3. **Hash:** give every file a key built from its own contents plus the keys of everything it imports. Import cycles are grouped and hashed together. The key also covers `uv.lock`, the Python version and testy's version.
-4. **Skip:** a file whose key matches its last passing run is reported as `(cached)` and not run.
-5. **Run:** the remaining files run in parallel, one file per thread. Each file's tests run in order on that thread.
-
-Results are stored in `.testy/cache.json`.
-
 ## Installation
 
 testy isn't on PyPI. Install it from GitHub as a development dependency of the project you want to test, so it runs in that project's environment:
@@ -173,3 +163,13 @@ Editing the most-imported module reruns every test, so testy does a full run too
 ## Requirements
 
 Python 3.14 or later. Free-threaded Python (`uv python install 3.14t`) is needed for parallel speedups; on a regular build tests still run correctly, one at a time, and testy prints a warning.
+
+## How it works
+
+1. **Discover:** walk the given paths for `test_*.py` and read each file's top-level `test*` functions with `ast`, without importing anything.
+2. **Graph:** run `ruff analyze graph` to find which files each file imports, adding the parent `__init__.py` files that importing a module runs.
+3. **Hash:** give every file a key built from its own contents plus the keys of everything it imports. Import cycles are grouped and hashed together. The key also covers `uv.lock`, the Python version and testy's version.
+4. **Skip:** a file whose key matches its last passing run is reported as `(cached)` and not run.
+5. **Run:** the remaining files run in parallel, one file per thread. Each file's tests run in order on that thread.
+
+Results are stored in `.testy/cache.json`.
