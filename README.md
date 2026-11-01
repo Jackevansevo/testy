@@ -1,7 +1,7 @@
 # testy
 
 > [!WARNING]
-> testy is a purely experimental project, built to explore a different set of tradeoffs for a Python test runner. It isn't production-ready, isn't published to PyPI, and its behaviour and options may change at any time.
+> testy is a purely experimental project, it is not production-ready
 
 A small, fast and simple Python test runner
 
