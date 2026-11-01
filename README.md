@@ -104,16 +104,6 @@ Split fixtures into modules by topic (`tests/fixtures/numbers.py`, `tests/fixtur
 - **Test output is discarded.** `print` output never appears. `breakpoint()` and `input()` fail immediately instead of hanging, unless you pass `--pdb`.
 - **The cache only sees static imports.** See [Cache accuracy](#cache-accuracy).
 
-## Examples
-
-- [`examples/testy`](examples/testy): a Flask and Flask-SQLAlchemy app sharing one in-memory SQLite database across parallel tests (`vfs=memdb`), with testy-style tests.
-- [`examples/pytest`](examples/pytest): the same tests written the usual pytest way, with `conftest.py` fixtures as in [Flask's testing docs](https://flask.palletsprojects.com/en/stable/testing/).
-
-```bash
-cd examples/testy && uv run testy
-cd examples/pytest && uv run pytest
-```
-
 ## Benchmark
 
 `bench/` generates a synthetic project whose plain-assert tests both runners can run, and times them:
