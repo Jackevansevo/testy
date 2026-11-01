@@ -110,7 +110,7 @@ Split fixtures into modules by topic (`tests/fixtures/numbers.py`, `tests/fixtur
 
 - **Isolation is your job.** Files run in parallel in one process and share module state, so tests must not modify shared objects or assume a shared database is empty.
 - **Test output is discarded.** `print` output never appears. `breakpoint()` and `input()` fail immediately instead of hanging, unless you pass `--pdb`.
-- **The cache only sees Python imports within the project.** Use `--force` after changing data files, environment variables or code elsewhere (see below).
+- **The cache only sees Python imports within the project.** Use `--force` after changing data files, environment variables or code outside the project.
 
 ## Examples
 
@@ -121,23 +121,6 @@ Split fixtures into modules by topic (`tests/fixtures/numbers.py`, `tests/fixtur
 cd examples/testy && uv run testy
 cd examples/pytest && uv run pytest
 ```
-
-## Intentionally not supported
-
-- Fixture injection, `conftest.py` and fixture scopes
-- Plugins and hooks
-- Parametrize and markers (`skip`, `xfail`)
-- Test classes and `unittest.TestCase`
-- Assertion rewriting
-- Showing test output (`-s`)
-- Test isolation
-- Parallelism within a file
-- Tracking data files, environment variables and dynamic imports
-- Tracking code outside the project
-- Configuration files
-- Built-in helpers (`tmp_path`, `monkeypatch`, `capsys`)
-- Doctests, coverage, flaky-test reruns and JUnit XML
-- Python before 3.14
 
 ## Benchmark
 
