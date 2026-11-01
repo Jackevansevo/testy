@@ -133,31 +133,37 @@ These are left out on purpose, to keep testy small and its caching correct:
 uv run bench/bench.py --modules 5000 --tests 2000
 ```
 
-Results on Apple silicon (2 performance and 4 efficiency cores), Python 3.14t, best of 2 runs. Each time includes starting Python.
+Results on Apple silicon (2 performance and 4 efficiency cores), Python 3.14t, best of 2 runs. Each time includes starting Python. Two suites were used:
 
-**5,000 modules, 2,000 test files, 20,000 fast tests:**
+- **Fast:** 5,000 modules, 2,000 test files, 20,000 quick tests.
+- **CPU-heavy:** 500 modules, 100 test files, 1,000 tests that each do pure-Python work (`--work 200000`).
 
-| Scenario | Runner | Time | vs pytest | Tests run |
+### Full runs: every test runs
+
+A like-for-like comparison: each runner runs the whole suite, with testy's cache turned off (`--force`).
+
+| Suite | Runner | Time | vs pytest |
+|---|---|---|---|
+| Fast | pytest | 9.27s | baseline |
+| Fast | pytest -n auto | 20.35s | +120% (2.2× slower) |
+| Fast | testy `--force` | **1.01s** | **−89% (9.2× faster)** |
+| CPU-heavy | pytest | 6.62s | baseline |
+| CPU-heavy | pytest -n auto | 3.63s | −45% (1.8× faster) |
+| CPU-heavy | testy `--force` | **3.15s** | **−52% (2.1× faster)** |
+
+On the fast suite, 7.77s of pytest's time is collection alone (`pytest --collect-only`). `pytest -n auto` is slower than plain pytest there, because each worker process collects the whole suite again.
+
+### Incremental runs: testy's cache
+
+testy only reruns test files whose imports changed. pytest has no equivalent, so there is nothing to compare against: every pytest run is a full run, as above.
+
+| Scenario | Fast: time | Fast: tests run | CPU-heavy: time | CPU-heavy: tests run |
 |---|---|---|---|---|
-| Run everything | pytest | 9.27s | baseline | 20,000 |
-| Run everything | pytest -n auto | 20.35s | +120% (2.2× slower) | 20,000 |
-| Run everything | testy `--force` | **1.01s** | **−89% (9.2× faster)** | 20,000 |
-| Collect only | pytest `--collect-only` | 7.77s | −16% | 0 |
-| Nothing changed | testy | **0.32s** | **−97% (29× faster)** | 0 |
-| Edit a leaf module | testy | **0.33s** | **−96% (28× faster)** | 10 |
-| Edit the most-imported module | testy | 0.97s | −90% (9.6× faster) | 20,000 |
+| Nothing changed | 0.32s | 0 | 0.08s | 0 |
+| Edit a leaf module | 0.33s | 10 | 0.16s | 10 |
+| Edit the most-imported module | 0.97s | 20,000 | 2.71s | 1,000 |
 
-**100 test files, 1,000 CPU-heavy tests** (`--work 200000`):
-
-| Scenario | Runner | Time | vs pytest | Tests run |
-|---|---|---|---|---|
-| Run everything | pytest | 6.62s | baseline | 1,000 |
-| Run everything | pytest -n auto | 3.63s | −45% (1.8× faster) | 1,000 |
-| Run everything | testy `--force` | **3.15s** | **−52% (2.1× faster)** | 1,000 |
-| Nothing changed | testy | **0.08s** | **−99% (83× faster)** | 0 |
-| Edit a leaf module | testy | **0.16s** | **−98% (41× faster)** | 10 |
-
-"vs pytest" compares each time with a plain `pytest` run of the whole suite. pytest has no equivalent of the cached scenarios: every pytest run collects and runs everything. With fast tests, `pytest -n auto` is slower than plain pytest, because each worker process collects the whole suite again.
+Editing the most-imported module reruns every test, so it costs about as much as a full run.
 
 ## Requirements
 
