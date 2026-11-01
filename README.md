@@ -138,18 +138,16 @@ Results on Apple silicon (2 performance and 4 efficiency cores), Python 3.14t, b
 
 ### Full runs: every test runs
 
-A like-for-like comparison: each runner runs the whole suite, with testy's cache turned off (`--force`).
+A like-for-like comparison: each runner runs the whole suite, with testy's cache turned off (`--force`). Each pair compares the same mode: one at a time (`pytest` against `testy -j 1`), and in parallel (`pytest -n auto` against `testy`).
 
-| Suite | Runner | Time | vs pytest |
-|---|---|---|---|
-| Fast | pytest | 9.27s | baseline |
-| Fast | pytest -n auto | 20.35s | +120% (2.2× slower) |
-| Fast | testy `--force` | **1.01s** | **−89% (9.2× faster)** |
-| CPU-heavy | pytest | 6.62s | baseline |
-| CPU-heavy | pytest -n auto | 3.63s | −45% (1.8× faster) |
-| CPU-heavy | testy `--force` | **3.15s** | **−52% (2.1× faster)** |
+| Suite | Mode | pytest | testy | Difference |
+|---|---|---|---|---|
+| Fast | One at a time | 9.34s | **1.40s** | **−85% (6.7× faster)** |
+| Fast | Parallel | 22.94s | **0.96s** | **−96% (24× faster)** |
+| CPU-heavy | One at a time | 6.60s | **5.97s** | **−10% (1.1× faster)** |
+| CPU-heavy | Parallel | 3.60s | **3.04s** | **−16% (1.2× faster)** |
 
-On the fast suite, 7.77s of pytest's time is collection alone (`pytest --collect-only`). `pytest -n auto` is slower than plain pytest there, because each worker process collects the whole suite again.
+On the fast suite, 7.38s of pytest's time is collection alone (`pytest --collect-only`), and `pytest -n auto` is slower than plain pytest because each worker process collects the whole suite again. On the CPU-heavy suite the tests themselves dominate, so the runners are much closer.
 
 ### Incremental runs: testy's cache
 
@@ -157,9 +155,9 @@ testy only reruns test files whose imports changed. pytest has no equivalent, so
 
 | Scenario | Fast: time | Fast: tests run | CPU-heavy: time | CPU-heavy: tests run |
 |---|---|---|---|---|
-| Nothing changed | 0.32s | 0 | 0.08s | 0 |
+| Nothing changed | 0.30s | 0 | 0.09s | 0 |
 | Edit a leaf module | 0.33s | 10 | 0.16s | 10 |
-| Edit the most-imported module | 0.97s | 20,000 | 2.71s | 1,000 |
+| Edit the most-imported module | 0.93s | 20,000 | 2.69s | 1,000 |
 
 Editing the most-imported module reruns every test, so it costs about as much as a full run.
 

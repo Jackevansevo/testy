@@ -83,6 +83,7 @@ def main() -> None:
     rows = [
         ("cold", "pytest", best(PYTEST, root, a.repeat)),
         ("cold", "pytest -n auto", best(PYTEST + ["-n", "auto"], root, a.repeat)),
+        ("cold", "testy -j 1", best(TESTY + ["--force", "-j", "1"], root, a.repeat)),
         ("cold", "testy", best(TESTY + ["--force"], root, a.repeat)),
         (
             "collect only",
