@@ -88,6 +88,13 @@ Split fixtures into modules by topic (`tests/fixtures/numbers.py`, `tests/fixtur
 
 The suite is synthetic: 20,000 tests in 2,000 files, importing 5,000 small modules. It ran on Apple silicon with Python 3.14t, taking the best of 3 runs.
 
+Where pytest's time goes, from profiling a warm `pytest` run of this suite (5.6s):
+
+- **About 40% is collection** (2.2s on its own). pytest imports every test module, then builds an object for each test, with its markers and fixture information.
+- **About 60% is running the tests, but the test bodies themselves are about 2%.** pytest runs each test in three phases (setup, call and teardown). It wraps each phase in output, log and warnings capture, builds a report object for it, and passes every step through its plugin hooks: about 400,000 hook calls for 20,000 tests.
+
+testy skips almost all of that. It reads test names straight from the source, imports each test module only when it runs it, calls each test function directly, and discards output once for the whole run.
+
 How fair is it? It's close to a best case for testy and a worst case for pytest:
 
 - **The tests do almost nothing.** Each one checks a bit of arithmetic, so the runner's own per-test overhead dominates. Real tests do real work, and the gap shrinks. On 1,000 CPU-heavy tests, full runs were only 3–10% faster than pytest.
