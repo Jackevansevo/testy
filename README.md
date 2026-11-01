@@ -10,6 +10,8 @@ A small, fast Python test runner with a different set of tradeoffs from pytest:
 - **Simple.** No plugins, no `conftest.py`, no fixture injection. Tests are plain functions, and fixtures are plain Python you import.
 - **Parallel by default.** On free-threaded Python (3.14t), test files run on real parallel threads.
 
+[![asciicast](https://asciinema.org/a/YEIEfpFVOER3UqUd.svg)](https://asciinema.org/a/YEIEfpFVOER3UqUd)
+
 ## Installation
 
 testy isn't on PyPI. Install it from GitHub as a development dependency of the project you want to test, so it runs in that project's environment:
