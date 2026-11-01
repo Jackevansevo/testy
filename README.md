@@ -81,51 +81,14 @@ Split fixtures into modules by topic (`tests/fixtures/numbers.py`, `tests/fixtur
 
 ## Benchmark
 
-`bench/` generates a synthetic project whose plain-assert tests both runners can run, and times them:
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="bench/chart-dark.svg">
+  <img alt="Fast suite, seconds. Full run one at a time: testy 1.01, pytest 5.64. Full run in parallel: testy 0.90, pytest -n auto 9.42. After editing one module: testy 0.33, pytest 5.64 (it reruns everything)." src="bench/chart-light.svg">
+</picture>
 
-```bash
-uv run bench/bench.py --modules 5000 --tests 2000
-```
+A synthetic suite of 20,000 fast tests in 2,000 files over 5,000 modules, on Apple silicon with Python 3.14t, best of 3 runs. On a suite of 1,000 CPU-heavy tests, where the tests themselves take most of the time, full runs are within 3–10% of pytest, but a run after editing one module takes 0.16s against pytest's 3.00s.
 
-Results on Apple silicon (2 performance and 4 efficiency cores), Python 3.14t, best of 3 runs. Each time includes starting Python. Two suites were used:
-
-- **Fast:** 5,000 modules, 2,000 test files, 20,000 quick tests.
-- **CPU-heavy:** 500 modules, 100 test files, 1,000 tests that each do pure-Python work (`--work 200000`).
-
-### Full runs: every test runs
-
-A like-for-like comparison: each runner runs the whole suite, with testy's cache turned off (`--force`). Each pair compares the same mode: one at a time (`pytest` against `testy -j 1`), and in parallel (`pytest -n auto` against `testy`).
-
-| Suite | Mode | pytest | testy | Difference |
-|---|---|---|---|---|
-| Fast | One at a time | 5.64s | **1.01s** | **−82% (5.6× faster)** |
-| Fast | Parallel | 9.42s | **0.90s** | **−90% (10× faster)** |
-| CPU-heavy | One at a time | 6.34s | **6.15s** | **−3% (about the same)** |
-| CPU-heavy | Parallel | 3.00s | **2.70s** | **−10% (1.1× faster)** |
-
-On the fast suite, 2.20s of pytest's time is collection (`pytest --collect-only`), and most of the rest is pytest's per-test overhead. `pytest -n auto` is slower than plain pytest there, because each worker process collects the whole suite again. On the CPU-heavy suite the tests themselves dominate, so the runners are close.
-
-### Incremental runs: testy's cache
-
-testy only reruns test files whose imports changed. pytest has no equivalent, so after any change it has to run the whole suite again. The pytest column is its fastest full run of each suite from the table above: plain `pytest` for the fast suite, `pytest -n auto` for the CPU-heavy one.
-
-**Fast suite:**
-
-| Scenario | Tests testy runs | testy | pytest | Difference |
-|---|---|---|---|---|
-| Nothing changed | 0 | **0.31s** | 5.64s | **−95% (18× faster)** |
-| Edit a leaf module | 10 | **0.33s** | 5.64s | **−94% (17× faster)** |
-| Edit the most-imported module | 20,000 | **0.89s** | 5.64s | **−84% (6.3× faster)** |
-
-**CPU-heavy suite:**
-
-| Scenario | Tests testy runs | testy | pytest | Difference |
-|---|---|---|---|---|
-| Nothing changed | 0 | **0.09s** | 3.00s | **−97% (33× faster)** |
-| Edit a leaf module | 10 | **0.16s** | 3.00s | **−95% (19× faster)** |
-| Edit the most-imported module | 1,000 | **2.85s** | 3.00s | **−5% (about the same)** |
-
-Editing the most-imported module reruns every test, so testy does a full run too, and the gap is just the full-run gap.
+Reproduce it with `uv run bench/bench.py --modules 5000 --tests 2000`, and redraw the chart with `uv run --with matplotlib bench/chart.py`.
 
 ## Requirements
 
