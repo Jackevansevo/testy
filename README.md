@@ -3,7 +3,7 @@
 > [!WARNING]
 > testy is a purely experimental project, built to explore a different set of tradeoffs for a Python test runner. It isn't production-ready, isn't published to PyPI, and its behaviour and options may change at any time.
 
-A small, fast Python test runner with a different set of tradeoffs from pytest:
+A small, fast and simple Python test runner
 
 - **Fast.** Test files are found by parsing them, not importing them, so there is no slow collection step.
 - **Skips unchanged tests.** Like `go test`, results are cached and a test file only reruns when something it imports has changed.
