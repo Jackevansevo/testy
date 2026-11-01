@@ -88,6 +88,8 @@ Split fixtures into modules by topic (`tests/fixtures/numbers.py`, `tests/fixtur
 
 Two synthetic suites, on Apple silicon with Python 3.14t. After an edit, pytest reruns everything, so it's shown with its fastest full run.
 
+If your suite is slow because the tests themselves are slow, the runner usually isn't the bottleneck: the CPU-heavy panel shows full runs within 10% of pytest. testy helps most by not running tests at all, when nothing they depend on has changed.
+
 Reproduce them with `uv run bench/bench.py --modules 5000 --tests 2000` and `uv run bench/bench.py --tests 100 --work 200000`, and redraw the chart with `uv run --with matplotlib bench/chart.py`.
 
 ## Requirements
