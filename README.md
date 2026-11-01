@@ -83,14 +83,12 @@ Split fixtures into modules by topic (`tests/fixtures/numbers.py`, `tests/fixtur
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="bench/chart-dark.svg">
-  <img alt="Fast suite, seconds. Full run one at a time: testy 1.01, pytest 5.64. Full run in parallel: testy 0.90, pytest -n auto 9.42. After editing one module: testy 0.33, pytest 5.64 (it reruns everything)." src="bench/chart-light.svg">
+  <img alt="Seconds, lower is better. 20,000 fast tests: full run one at a time, testy 1.01 vs pytest 5.64; in parallel, testy 0.90 vs pytest -n auto 9.42; after editing one module, testy 0.33 vs pytest 5.64. 1,000 CPU-heavy tests: one at a time, testy 6.15 vs pytest 6.34; in parallel, testy 2.70 vs pytest -n auto 3.00; after editing one module, testy 0.16 vs pytest -n auto 3.00." src="bench/chart-light.svg">
 </picture>
 
-20,000 trivial tests in 2,000 files, on Apple silicon with Python 3.14t. Most of pytest's time here is its own overhead, not the tests: collection, plus per-test capture, reports and plugin hooks.
+Two synthetic suites, on Apple silicon with Python 3.14t. After an edit, pytest reruns everything, so it's shown with its fastest full run.
 
-That makes this close to a best case for testy. When tests do real work the gap shrinks: on CPU-heavy tests, full runs were only 3–10% faster.
-
-Reproduce it with `uv run bench/bench.py --modules 5000 --tests 2000`, and redraw the chart with `uv run --with matplotlib bench/chart.py`.
+Reproduce them with `uv run bench/bench.py --modules 5000 --tests 2000` and `uv run bench/bench.py --tests 100 --work 200000`, and redraw the chart with `uv run --with matplotlib bench/chart.py`.
 
 ## Requirements
 
