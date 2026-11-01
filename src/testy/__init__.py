@@ -65,6 +65,12 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
         action="store_true",
         help="run last run's failures first",
     )
+    p.add_argument(
+        "--lf",
+        "--last-failed",
+        action="store_true",
+        help="run only the tests that failed last time",
+    )
     p.add_argument("--force", action="store_true", help="ignore cached results")
     p.add_argument(
         "-j",
@@ -108,6 +114,25 @@ def run(argv: list[str] | None = None) -> int:
     keys = hasher.keys(
         [p for p in selection if p in import_graph], import_graph, __version__
     )
+    # --lf: only files that failed last time, and within them only the failed tests
+    # (None: the whole file, e.g. when it failed to import).
+    last_failed: dict[str, set[str] | None] = {}
+    if args.lf:
+        for path in selection:
+            prev = results.get(path)
+            if prev and not prev["passed"]:
+                failed = set(prev.get("failed", []))
+                last_failed[path] = (
+                    None if not failed or "<import>" in failed else failed
+                )
+        if last_failed:
+            selection = {p: w for p, w in selection.items() if p in last_failed}
+        else:
+            print(
+                "testy: no failures from the last run, running everything",
+                file=sys.stderr,
+            )
+
     for path in sorted(selection):
         key = keys.get(path)
         prev = results.get(path)
@@ -115,7 +140,8 @@ def run(argv: list[str] | None = None) -> int:
             not args.force and key and prev and prev["key"] == key and prev["passed"]
         )
         want = selection[path]
-        partial = want is not None or match is not None
+        lf_want = last_failed.get(path)
+        partial = want is not None or match is not None or lf_want is not None
         if fresh and not partial:
             # The key covers the file's contents, so its stored names can't be stale.
             cached.append((path, prev.get("names") or test_names(path)))
@@ -128,6 +154,9 @@ def run(argv: list[str] | None = None) -> int:
             names = [n for n in names if n in want]
         if match:
             names = [n for n in names if match(f"{path}::{n}")]
+        if lf_want is not None:
+            # Failed tests that have since been renamed or removed: run the rest.
+            names = [n for n in names if n in lf_want] or names
         if not names:
             continue
         if fresh:
@@ -234,13 +263,17 @@ def run(argv: list[str] | None = None) -> int:
                     continue
                 finished.append(result)
                 key, partial = futures[event]
-                # A partial run can't vouch for the tests it skipped, but its failures count.
-                if result.complete and (not partial or not result.passed):
-                    results[result.path] = {
-                        "key": key,
-                        "passed": result.passed,
-                        "names": [o.name for o in result.outcomes],
-                    }
+                if result.complete:
+                    entry = cache.record(
+                        results.get(result.path),
+                        key,
+                        [o.name for o in result.outcomes],
+                        {o.name for o in result.outcomes if o.error},
+                        partial,
+                        lambda path=result.path: test_names(path),
+                    )
+                    if entry:
+                        results[result.path] = entry
                 if level == 1:
                     marks = "".join(
                         c.green(".") if o.error is None else c.red("F")
