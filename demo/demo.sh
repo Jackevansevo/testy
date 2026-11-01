@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # A scripted demo of testy, for asciinema. To record it:
-#   demo/record.sh   (records this script to demo/demo.cast)
+#   demo/record.sh   (records this script to demo/demo.cast and demo/demo.gif)
 set -euo pipefail
 cd "$(dirname "$0")/../examples/testy"
 unset PYTHONDONTWRITEBYTECODE  # record what a normal shell would do
