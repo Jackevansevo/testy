@@ -147,7 +147,7 @@ cd examples/pytest && uv run pytest
 uv run bench/bench.py --modules 5000 --tests 2000
 ```
 
-Results on Apple silicon (2 performance and 4 efficiency cores), Python 3.14t, best of 3 runs, so Python's bytecode caches are warm. Each time includes starting Python. Two suites were used:
+Results on Apple silicon (2 performance and 4 efficiency cores), Python 3.14t, best of 3 runs. Each time includes starting Python. Two suites were used:
 
 - **Fast:** 5,000 modules, 2,000 test files, 20,000 quick tests.
 - **CPU-heavy:** 500 modules, 100 test files, 1,000 tests that each do pure-Python work (`--work 200000`).
@@ -164,8 +164,6 @@ A like-for-like comparison: each runner runs the whole suite, with testy's cache
 | CPU-heavy | Parallel | 3.00s | **2.70s** | **−10% (1.1× faster)** |
 
 On the fast suite, 2.20s of pytest's time is collection (`pytest --collect-only`), and most of the rest is pytest's per-test overhead. `pytest -n auto` is slower than plain pytest there, because each worker process collects the whole suite again. On the CPU-heavy suite the tests themselves dominate, so the runners are close.
-
-These numbers are with Python's bytecode cache on. With `PYTHONDONTWRITEBYTECODE=1` set, pytest can't cache its rewritten test modules and rewrites every one on every run: collection alone took 7.4s on the fast suite. The benchmark ignores that variable.
 
 ### Incremental runs: testy's cache
 
